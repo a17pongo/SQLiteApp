@@ -12,6 +12,7 @@ public class MountainReaderDbHelper extends SQLiteOpenHelper {
 
     // TODO: You need to add member variables and methods to this helper class
     // See: https://developer.android.com/training/data-storage/sqlite.html#DbHelper
+
     MountainReaderDbHelper(Context context){
         super(context,"mountainsdb",null,1);
     }
@@ -25,4 +26,6 @@ public class MountainReaderDbHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //db.execSQL();
     }
+
+
 }

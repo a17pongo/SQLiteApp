@@ -2,8 +2,6 @@ package org.brohede.marcus.sqliteapp;
 
 import android.provider.BaseColumns;
 
-import static org.brohede.marcus.sqliteapp.MountainReaderContract.MountainEntry.TABLE_NAME;
-
 /**
  * Created by marcus on 2018-04-25.
  */
@@ -22,7 +20,8 @@ public class MountainReaderContract {
         public static final String COLUMN_NAME_LOCATION = "location";
     }
 
-    public static final String SQL_STRING = "CREATE DATABASE " + MountainEntry.TABLE_NAME + " (" +
+    public static final String SQL_STRING = "CREATE DATABASE IF NOT EXISTS " +
+                    MountainEntry.TABLE_NAME + " (" +
                     MountainEntry._ID + " INTEGER PRIMARY KEY," +
                     MountainEntry.COLUMN_NAME_NAME + " TEXT," +
                     MountainEntry.COLUMN_NAME_HEIGHT + " TEXT,"+

@@ -1,6 +1,10 @@
 package org.brohede.marcus.sqliteapp;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.provider.BaseColumns;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,6 +47,45 @@ public class MainActivity extends AppCompatActivity {
                 Mountain m = mountains.get(position);
                 Toast.makeText(MainActivity.this,m.info(),Toast.LENGTH_SHORT).show();
             }});
+
+        MountainReaderDbHelper mDbHelper = new MountainReaderDbHelper(this);
+
+        // Gets the data repository in write mode
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME,"hej");
+
+        // Insert the new row, returning the primary key value of the new row
+        db.insert(MountainReaderContract.MountainEntry.TABLE_NAME, null, values);
+
+        // Define a projection that specifies which columns from the database
+        // you will actually use after this query.
+        String[] projection = {
+                BaseColumns._ID,
+                MountainReaderContract.MountainEntry.COLUMN_NAME_NAME
+        };
+
+        // Filter results WHERE "title" = 'My Title'
+        String selection = MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " = ?";
+        String[] selectionArgs = { "My Title" };
+
+        // How you want the results sorted in the resulting Cursor
+        String sortOrder =
+                MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " DESC";
+
+        Cursor cursor = db.query(
+                MountainReaderContract.MountainEntry.TABLE_NAME,   // The table to query
+                projection,             // The array of columns to return (pass null to get all)
+                selection,              // The columns for the WHERE clause
+                selectionArgs,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                sortOrder               // The sort order
+        );
+
+        Log.d("test",cursor.toString());
     }
     /*
         TODO: Create an App that stores Mountain data in SQLite database
