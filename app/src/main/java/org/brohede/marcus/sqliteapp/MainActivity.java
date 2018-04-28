@@ -8,6 +8,9 @@ import android.provider.BaseColumns;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,6 +33,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private List<Mountain> mountains = new ArrayList<>();
     private ArrayAdapter adapter;
+    SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,17 +55,8 @@ public class MainActivity extends AppCompatActivity {
         MountainReaderDbHelper mDbHelper = new MountainReaderDbHelper(this);
 
         // Gets the data repository in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        db = mDbHelper.getWritableDatabase();
 
-        // Create a new map of values, where column names are the keys
-        ContentValues values = new ContentValues();
-        values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME,"hej");
-
-        // Insert the new row, returning the primary key value of the new row
-        db.insert(MountainReaderContract.MountainEntry.TABLE_NAME, null, values);
-
-        // Define a projection that specifies which columns from the database
-        // you will actually use after this query.
         String[] projection = {
                 BaseColumns._ID,
                 MountainReaderContract.MountainEntry.COLUMN_NAME_NAME
@@ -69,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Filter results WHERE "title" = 'My Title'
         String selection = MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " = ?";
-        String[] selectionArgs = { "My Title" };
+        String[] selectionArgs = { "k2" };
 
         // How you want the results sorted in the resulting Cursor
         String sortOrder =
@@ -85,21 +80,43 @@ public class MainActivity extends AppCompatActivity {
                 sortOrder               // The sort order
         );
 
-        Log.d("test",cursor.toString());
+        while(cursor.moveToNext()) {
+            long itemId = cursor.getLong(
+                    cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry._ID));
+            Log.d("test",cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME)));
+        }
+        cursor.close();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.my_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.refresh:
+                adapter.clear();
+                new FetchData().execute();
+                return true;
+            case R.id.drop_db:
+                /*kod för att droppa lokala databasen*/
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
     /*
-        TODO: Create an App that stores Mountain data in SQLite database
 
         TODO: The Main Activity must have a ListView that displays the names of all the Mountains
               currently in the local SQLite database.
 
         TODO: In the details activity an ImageView should display the img_url
               See: https://developer.android.com/reference/android/widget/ImageView.html
-
-        TODO: The main activity must have an Options Menu with the following options:
-              * "Fetch mountains" - Which fetches mountains from the same Internet service as in
-                "Use JSON data over Internet" assignment. Re-use code.
-              * "Drop database" - Which drops the local SQLite database
 
         TODO: All fields in the details activity should be EditText elements
 
@@ -110,8 +127,6 @@ public class MainActivity extends AppCompatActivity {
         TODO: The details activity must have a button "Delete" that removes the
               current mountain from the local SQLite database
               See: https://developer.android.com/training/data-storage/sqlite.html
-
-        TODO: The SQLite database must not contain any duplicate mountain names
 
      */
     private class FetchData extends AsyncTask<Void,Void,String> {
@@ -195,6 +210,13 @@ public class MainActivity extends AppCompatActivity {
                     //String bergAux = berg.getString("auxdata");
                     Mountain test = new Mountain(bergNamn,bergPlats,bergSize);
                     adapter.add(test);
+
+                    ContentValues values = new ContentValues();
+                    values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME,bergNamn);
+                    values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION,bergPlats);
+                    //values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT,bergSize);
+
+                    db.insert(MountainReaderContract.MountainEntry.TABLE_NAME, null, values);
                 }
             } catch (JSONException e) {
                 Log.e("brom","E:"+e.getMessage());
