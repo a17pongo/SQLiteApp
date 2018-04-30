@@ -12,15 +12,15 @@ public class Mountain {
     private String name;
     private String location;
     private int height;
-    //private String img_url;
-    //private String info_url;
+    private String img_url;
+    private String info_url;
 
-    public Mountain(String inName,String inLocation, int inHeight){
+    public Mountain(String inName,String inLocation, int inHeight, String inImg_url, String inInfo_url){
         name = inName;
         location = inLocation;
         height = inHeight;
-        //img_url=inImg_url;
-        //info_url=inInfo_url;
+        img_url=inImg_url;
+        info_url=inInfo_url;
     }
 
     @Override

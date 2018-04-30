@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/desc_order"
-        android:title="Descending order"
+        android:title="Sort height"
         android:checkable="true"
         android:checked="false"/>
-    <item android:id="@+id/drop_db"
-        android:title="Drop database" />
 </menu>

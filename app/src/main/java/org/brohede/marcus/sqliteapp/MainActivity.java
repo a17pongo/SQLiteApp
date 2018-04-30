@@ -1,22 +1,4 @@
 package org.brohede.marcus.sqliteapp;
-    /*
-
-        TODO: The Main Activity must have a ListView that displays the names of all the Mountains
-              currently in the local SQLite database.
-
-        TODO: In the details activity an ImageView should display the img_url
-              See: https://developer.android.com/reference/android/widget/ImageView.html
-
-        TODO: All fields in the details activity should be EditText elements
-
-        TODO: The details activity must have a button "Update" that updates the current mountain
-              in the local SQLite database with the values from the EditText boxes.
-              See: https://developer.android.com/training/data-storage/sqlite.html
-
-        TODO: The details activity must have a button "Delete" that removes the
-              current mountain from the local SQLite database
-              See: https://developer.android.com/training/data-storage/sqlite.html
-     */
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -56,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
     SQLiteDatabase dbW;
     MountainReaderDbHelper mDbHelper;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,50 +57,6 @@ public class MainActivity extends AppCompatActivity {
             }});
 
         mDbHelper = new MountainReaderDbHelper(this);
-
-        //Hämtar ett värde från databasen
-/*
-        dbR = mDbHelper.getReadableDatabase();
-
-        String[] projection = {
-                BaseColumns._ID,
-                MountainReaderContract.MountainEntry.COLUMN_NAME_NAME,
-                MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION,
-                MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT
-        };
-
-        // How you want the results sorted in the resulting Cursor
-        String sortOrder;
-        if(isChecked){
-            sortOrder =
-                    MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " ASC";
-        }
-
-        else {
-            sortOrder =
-                    MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " DESC";
-        }
-
-
-        Cursor cursor = dbR.query(
-                MountainReaderContract.MountainEntry.TABLE_NAME,   // The table to query
-                projection,             // The array of columns to return (pass null to get all)
-                null,              // The columns for the WHERE clause
-                null,          // The values for the WHERE clause
-                null,                   // don't group the rows
-                null,                   // don't filter by row groups
-                sortOrder               // The sort order
-        );
-
-        while(cursor.moveToNext()) {
-            String bergNamn = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME));
-            String bergPlats = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION));
-            int bergHojd = cursor.getInt(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT));
-
-            Mountain test = new Mountain(bergNamn,bergPlats,bergHojd);
-            adapter.add(test);
-        }
-        cursor.close();*/
     }
 
     public void readDB(){
@@ -137,9 +73,8 @@ public class MainActivity extends AppCompatActivity {
         String sortOrder;
         if(isChecked){
             sortOrder =
-                    MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " ASC";
+                    MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT + " ASC";
         }
-
         else {
             sortOrder =
                     MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " DESC";
@@ -160,8 +95,10 @@ public class MainActivity extends AppCompatActivity {
             String bergNamn = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME));
             String bergPlats = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION));
             int bergHojd = cursor.getInt(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT));
+            String bergImg = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_IMGURL));
+            String bergInfo = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_INFOURL));
 
-            Mountain test = new Mountain(bergNamn,bergPlats,bergHojd);
+            Mountain test = new Mountain(bergNamn,bergPlats,bergHojd,bergImg,bergInfo);
             adapter.add(test);
         }
         cursor.close();
@@ -194,9 +131,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 isChecked = item.isChecked();
                 readDB();
-                return true;
-            case R.id.drop_db:
-                /*kod för att droppa lokala databasen*/
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -277,13 +211,13 @@ public class MainActivity extends AppCompatActivity {
                 for(int i=0; i<json1.length();i++){
                     JSONObject berg = json1.getJSONObject(i);
                     String bergNamn = berg.getString("name");
-                    String bergTyp = berg.getString("type");
+                    //String bergTyp = berg.getString("type");
                     String bergPlats = berg.getString("location");
-                    String bergComp = berg.getString("company");
+                    //String bergComp = berg.getString("company");
                     int bergId = berg.getInt("ID");
-                    String bergCategory = berg.getString("category");
+                    //String bergCategory = berg.getString("category");
                     int bergSize = berg.getInt("size");
-                    int bergCost = berg.getInt("cost");
+                    //int bergCost = berg.getInt("cost");
                     //String bergAux = berg.getString("auxdata");
 
                     ContentValues values = new ContentValues();
