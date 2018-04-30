@@ -49,11 +49,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private boolean isChecked = false;
     private List<Mountain> mountains = new ArrayList<>();
     private ArrayAdapter adapter;
     SQLiteDatabase dbR;
     SQLiteDatabase dbW;
     MountainReaderDbHelper mDbHelper;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         mDbHelper = new MountainReaderDbHelper(this);
 
         //Hämtar ett värde från databasen
-
+/*
         dbR = mDbHelper.getReadableDatabase();
 
         String[] projection = {
@@ -87,8 +90,61 @@ public class MainActivity extends AppCompatActivity {
         };
 
         // How you want the results sorted in the resulting Cursor
-        String sortOrder =
-                MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " ASC";
+        String sortOrder;
+        if(isChecked){
+            sortOrder =
+                    MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " ASC";
+        }
+
+        else {
+            sortOrder =
+                    MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " DESC";
+        }
+
+
+        Cursor cursor = dbR.query(
+                MountainReaderContract.MountainEntry.TABLE_NAME,   // The table to query
+                projection,             // The array of columns to return (pass null to get all)
+                null,              // The columns for the WHERE clause
+                null,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                sortOrder               // The sort order
+        );
+
+        while(cursor.moveToNext()) {
+            String bergNamn = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME));
+            String bergPlats = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION));
+            int bergHojd = cursor.getInt(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT));
+
+            Mountain test = new Mountain(bergNamn,bergPlats,bergHojd);
+            adapter.add(test);
+        }
+        cursor.close();*/
+    }
+
+    public void readDB(){
+        adapter.clear();
+
+        String[] projection = {
+                BaseColumns._ID,
+                MountainReaderContract.MountainEntry.COLUMN_NAME_NAME,
+                MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION,
+                MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT
+        };
+
+        // How you want the results sorted in the resulting Cursor
+        String sortOrder;
+        if(isChecked){
+            sortOrder =
+                    MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " ASC";
+        }
+
+        else {
+            sortOrder =
+                    MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " DESC";
+        }
+
 
         Cursor cursor = dbR.query(
                 MountainReaderContract.MountainEntry.TABLE_NAME,   // The table to query
@@ -111,8 +167,14 @@ public class MainActivity extends AppCompatActivity {
         cursor.close();
     }
 
-
     //kod för meny
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem checkable = menu.findItem(R.id.desc_order);
+        checkable.setChecked(isChecked);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -124,9 +186,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.refresh:
-                adapter.clear();
-                new FetchData().execute();
+            case R.id.desc_order:
+                if(item.isChecked()){
+                    item.setChecked(false);
+                }else{
+                    item.setChecked(true);
+                }
+                isChecked = item.isChecked();
+                readDB();
                 return true;
             case R.id.drop_db:
                 /*kod för att droppa lokala databasen*/
