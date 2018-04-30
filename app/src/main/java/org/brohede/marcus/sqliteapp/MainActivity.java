@@ -81,14 +81,14 @@ public class MainActivity extends AppCompatActivity {
 
         String[] projection = {
                 BaseColumns._ID,
-                MountainReaderContract.MountainEntry.COLUMN_NAME_NAME
-                //MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION,
-                //MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT,
+                MountainReaderContract.MountainEntry.COLUMN_NAME_NAME,
+                MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION,
+                MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT
         };
 
         // How you want the results sorted in the resulting Cursor
         String sortOrder =
-                MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " DESC";
+                MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " ASC";
 
         Cursor cursor = dbR.query(
                 MountainReaderContract.MountainEntry.TABLE_NAME,   // The table to query
@@ -102,10 +102,10 @@ public class MainActivity extends AppCompatActivity {
 
         while(cursor.moveToNext()) {
             String bergNamn = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME));
-            //String bergPlats = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION));
-            //String bergHöjd = cursor.getInt(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT));
-            Log.d("kebe", cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME)));
-            Mountain test = new Mountain(bergNamn);
+            String bergPlats = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION));
+            int bergHojd = cursor.getInt(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT));
+
+            Mountain test = new Mountain(bergNamn,bergPlats,bergHojd);
             adapter.add(test);
         }
         cursor.close();
@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
                     ContentValues values = new ContentValues();
                     values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME,bergNamn);
                     values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION,bergPlats);
-                    //values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT,bergSize);
+                    values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT,bergSize);
 
                     dbW.insert(MountainReaderContract.MountainEntry.TABLE_NAME, null, values);
                 }

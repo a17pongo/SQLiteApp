@@ -23,7 +23,7 @@ public class MountainReaderContract {
     public static final String SQL_STRING = "CREATE TABLE IF NOT EXISTS " +
                     MountainEntry.TABLE_NAME + " (" +
                     MountainEntry._ID + " INTEGER PRIMARY KEY," +
-                    MountainEntry.COLUMN_NAME_NAME + " TEXT," +
-                    //MountainEntry.COLUMN_NAME_HEIGHT + " TEXT,"+
+                    MountainEntry.COLUMN_NAME_NAME + " TEXT NOT NULL UNIQUE," +
+                    MountainEntry.COLUMN_NAME_HEIGHT + " INTEGER,"+
                     MountainEntry.COLUMN_NAME_LOCATION + " TEXT" + ")";
 }

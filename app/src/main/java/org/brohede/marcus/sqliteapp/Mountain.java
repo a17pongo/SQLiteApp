@@ -15,10 +15,10 @@ public class Mountain {
     //private String img_url;
     //private String info_url;
 
-    public Mountain(String inName){
+    public Mountain(String inName,String inLocation, int inHeight){
         name = inName;
-        //location = inLocation;
-        //height = inHeight;
+        location = inLocation;
+        height = inHeight;
         //img_url=inImg_url;
         //info_url=inInfo_url;
     }
@@ -29,7 +29,6 @@ public class Mountain {
     }
 
 
-
     public String info(){
         String str = "Name: " + name;
         str += "\n" + "Height: " + height;
@@ -38,6 +37,4 @@ public class Mountain {
         //str += "\n" + "Info: " + info_url;
         return str;
     }
-
-
 }
