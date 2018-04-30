@@ -1,4 +1,22 @@
 package org.brohede.marcus.sqliteapp;
+    /*
+
+        TODO: The Main Activity must have a ListView that displays the names of all the Mountains
+              currently in the local SQLite database.
+
+        TODO: In the details activity an ImageView should display the img_url
+              See: https://developer.android.com/reference/android/widget/ImageView.html
+
+        TODO: All fields in the details activity should be EditText elements
+
+        TODO: The details activity must have a button "Update" that updates the current mountain
+              in the local SQLite database with the values from the EditText boxes.
+              See: https://developer.android.com/training/data-storage/sqlite.html
+
+        TODO: The details activity must have a button "Delete" that removes the
+              current mountain from the local SQLite database
+              See: https://developer.android.com/training/data-storage/sqlite.html
+     */
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -33,12 +51,15 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private List<Mountain> mountains = new ArrayList<>();
     private ArrayAdapter adapter;
-    SQLiteDatabase db;
+    SQLiteDatabase dbR;
+    SQLiteDatabase dbW;
+    MountainReaderDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         new FetchData().execute();
         adapter = new ArrayAdapter(MainActivity.this, R.layout.view_items, R.id.my_text, mountains);
 
@@ -52,42 +73,46 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this,m.info(),Toast.LENGTH_SHORT).show();
             }});
 
-        MountainReaderDbHelper mDbHelper = new MountainReaderDbHelper(this);
+        mDbHelper = new MountainReaderDbHelper(this);
 
-        // Gets the data repository in write mode
-        db = mDbHelper.getWritableDatabase();
+        //Hämtar ett värde från databasen
+
+        dbR = mDbHelper.getReadableDatabase();
 
         String[] projection = {
                 BaseColumns._ID,
                 MountainReaderContract.MountainEntry.COLUMN_NAME_NAME
+                //MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION,
+                //MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT,
         };
-
-        // Filter results WHERE "title" = 'My Title'
-        String selection = MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " = ?";
-        String[] selectionArgs = { "k2" };
 
         // How you want the results sorted in the resulting Cursor
         String sortOrder =
                 MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " DESC";
 
-        Cursor cursor = db.query(
+        Cursor cursor = dbR.query(
                 MountainReaderContract.MountainEntry.TABLE_NAME,   // The table to query
                 projection,             // The array of columns to return (pass null to get all)
-                selection,              // The columns for the WHERE clause
-                selectionArgs,          // The values for the WHERE clause
+                null,              // The columns for the WHERE clause
+                null,          // The values for the WHERE clause
                 null,                   // don't group the rows
                 null,                   // don't filter by row groups
                 sortOrder               // The sort order
         );
 
         while(cursor.moveToNext()) {
-            long itemId = cursor.getLong(
-                    cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry._ID));
-            Log.d("test",cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME)));
+            String bergNamn = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME));
+            //String bergPlats = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION));
+            //String bergHöjd = cursor.getInt(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT));
+            Log.d("kebe", cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME)));
+            Mountain test = new Mountain(bergNamn);
+            adapter.add(test);
         }
         cursor.close();
     }
 
+
+    //kod för meny
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -110,25 +135,8 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-    /*
 
-        TODO: The Main Activity must have a ListView that displays the names of all the Mountains
-              currently in the local SQLite database.
-
-        TODO: In the details activity an ImageView should display the img_url
-              See: https://developer.android.com/reference/android/widget/ImageView.html
-
-        TODO: All fields in the details activity should be EditText elements
-
-        TODO: The details activity must have a button "Update" that updates the current mountain
-              in the local SQLite database with the values from the EditText boxes.
-              See: https://developer.android.com/training/data-storage/sqlite.html
-
-        TODO: The details activity must have a button "Delete" that removes the
-              current mountain from the local SQLite database
-              See: https://developer.android.com/training/data-storage/sqlite.html
-
-     */
+    //kod för at hämta json datta och spara i SQLlite
     private class FetchData extends AsyncTask<Void,Void,String> {
         @Override
         protected String doInBackground(Void... params) {
@@ -196,7 +204,9 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 JSONArray json1 = new JSONArray(o);
-                adapter.clear();
+                // Gets the data repository in write mode
+                dbW = mDbHelper.getWritableDatabase();
+
                 for(int i=0; i<json1.length();i++){
                     JSONObject berg = json1.getJSONObject(i);
                     String bergNamn = berg.getString("name");
@@ -208,15 +218,13 @@ public class MainActivity extends AppCompatActivity {
                     int bergSize = berg.getInt("size");
                     int bergCost = berg.getInt("cost");
                     //String bergAux = berg.getString("auxdata");
-                    Mountain test = new Mountain(bergNamn,bergPlats,bergSize);
-                    adapter.add(test);
 
                     ContentValues values = new ContentValues();
                     values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME,bergNamn);
                     values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION,bergPlats);
                     //values.put(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT,bergSize);
 
-                    db.insert(MountainReaderContract.MountainEntry.TABLE_NAME, null, values);
+                    dbW.insert(MountainReaderContract.MountainEntry.TABLE_NAME, null, values);
                 }
             } catch (JSONException e) {
                 Log.e("brom","E:"+e.getMessage());

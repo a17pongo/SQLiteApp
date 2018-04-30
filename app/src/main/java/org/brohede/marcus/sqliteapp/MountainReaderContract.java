@@ -16,7 +16,7 @@ public class MountainReaderContract {
     public static class MountainEntry implements BaseColumns {
         public static final String TABLE_NAME = "mountain";
         public static final String COLUMN_NAME_NAME = "name";
-        //public static final String COLUMN_NAME_HEIGHT = "height";
+        public static final String COLUMN_NAME_HEIGHT = "height";
         public static final String COLUMN_NAME_LOCATION = "location";
     }
 
