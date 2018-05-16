@@ -6,6 +6,6 @@
     android:paddingRight="16dp"
     android:paddingTop="8dp"
     android:fontFamily="Robot"
-    android:textSize="37sp"
+    android:textSize="26sp"
     >
 </TextView>

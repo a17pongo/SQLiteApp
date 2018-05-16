@@ -31,7 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private boolean isChecked = false;
+    private boolean ascending = false;
+    private boolean descending = false;
     private List<Mountain> mountains = new ArrayList<>();
     private ArrayAdapter adapter;
     SQLiteDatabase dbR;
@@ -42,10 +43,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         new FetchData().execute();
-        adapter = new ArrayAdapter(MainActivity.this, R.layout.view_items, R.id.my_text, mountains);
 
+        adapter = new ArrayAdapter(MainActivity.this, R.layout.view_items, R.id.my_text, mountains);
         ListView listView = (ListView) findViewById(R.id.my_list);
         listView.setAdapter(adapter);
 
@@ -57,10 +57,20 @@ public class MainActivity extends AppCompatActivity {
             }});
 
         mDbHelper = new MountainReaderDbHelper(this);
+        readDB();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.my_menu, menu);
+        return true;
     }
 
     public void readDB(){
         adapter.clear();
+
+        dbR = mDbHelper.getReadableDatabase();
 
         String[] projection = {
                 BaseColumns._ID,
@@ -70,14 +80,12 @@ public class MainActivity extends AppCompatActivity {
         };
 
         // How you want the results sorted in the resulting Cursor
-        String sortOrder;
-        if(isChecked){
-            sortOrder =
-                    MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT + " ASC";
+        String sortOrder = MountainReaderContract.MountainEntry.COLUMN_NAME_NAME  + " DESC";
+        if (descending) {
+            sortOrder = MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT + " DESC";
         }
-        else {
-            sortOrder =
-                    MountainReaderContract.MountainEntry.COLUMN_NAME_NAME + " DESC";
+        else if (ascending) {
+            sortOrder = MountainReaderContract.MountainEntry.COLUMN_NAME_NAME+ " ASC";
         }
 
 
@@ -95,41 +103,37 @@ public class MainActivity extends AppCompatActivity {
             String bergNamn = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_NAME));
             String bergPlats = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_LOCATION));
             int bergHojd = cursor.getInt(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_HEIGHT));
-            String bergImg = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_IMGURL));
-            String bergInfo = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_INFOURL));
+            //String bergImg = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_IMGURL));
+            //String bergInfo = cursor.getString(cursor.getColumnIndexOrThrow(MountainReaderContract.MountainEntry.COLUMN_NAME_INFOURL));
 
-            Mountain test = new Mountain(bergNamn,bergPlats,bergHojd,bergImg,bergInfo);
-            adapter.add(test);
+            Mountain mq = new Mountain(bergNamn,bergPlats,bergHojd);
+            adapter.add(mq);
         }
         cursor.close();
     }
 
-    //kod för meny
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem checkable = menu.findItem(R.id.desc_order);
-        checkable.setChecked(isChecked);
+        //MenuItem checkable = menu.findItem(R.id.desc_order);
+        //checkable.setChecked(isChecked);
         return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.my_menu, menu);
-        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.desc_order:
-                if(item.isChecked()){
-                    item.setChecked(false);
-                }else{
-                    item.setChecked(true);
-                }
-                isChecked = item.isChecked();
+            case R.id.order_name:
+                descending = false;
+                ascending = true;
+                readDB();
+                return true;
+            case R.id.order_height:
+                descending = true;
+                ascending = false;
+                readDB();
+                return true;
+            case R.id.refresh:
                 readDB();
                 return true;
             default:
@@ -214,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
                     //String bergTyp = berg.getString("type");
                     String bergPlats = berg.getString("location");
                     //String bergComp = berg.getString("company");
-                    int bergId = berg.getInt("ID");
+                    //int bergId = berg.getInt("ID");
                     //String bergCategory = berg.getString("category");
                     int bergSize = berg.getInt("size");
                     //int bergCost = berg.getInt("cost");
@@ -231,5 +235,11 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("brom","E:"+e.getMessage());
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        mDbHelper.close();
+        super.onDestroy();
     }
 }
